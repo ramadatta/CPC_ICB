@@ -1,0 +1,16 @@
+AT2	Apoe,Ccl12,Il12b,Ifng,Tgfb1
+Airway Epithelium	Cxcl10,Kng1,Ifng,Il12a,Csf2
+Alveolar Macrophages	Apoe,Tgfb1,Vegfa,Spp1,Sectm1a
+Capillary cells	Il1b,Agt,Fgf2,Vegfa,Tnf
+Dendritic cells	Cyr61,Kl,Mapt,Pf4,Angpt1
+Fibroblasts and Protector cells	Spp1,Tgfb1,Edn1,Il1b,Grem1
+Granulocytes	Il4,Tnfsf12,Ccl12,Hmgb1,Il21
+Innate Lymphoid cells	Camp,Il18,Ccl12,Il17a,Nlgn3
+Interstitial Macrophages	Fgf1,Csf1,Agt,Apoa1,Apoe
+Monocytes and M2 Macrophages	Il34,Apoe,Tnf,Fgf1,Tnfsf11
+NKT cells	Il12b,Il18,Il12a,Ifng,Il23a
+Plasma B cells	Il4,Penk,Cga,Il12b,Ptgs2
+T cells	Il12a,Il12b,Ifng,Ccl12,Cxcl9
+Vascular Endothelial cells	Plg,Vegfa,Bmp2,Ostn,Il11
+classical Monocytes	Insl6,Il2,Il12b,Cxcl9,Il12a
+non classical Monocytes	Hmgb2,Apoa1,H2-DMa,Gnrh1,Wisp2

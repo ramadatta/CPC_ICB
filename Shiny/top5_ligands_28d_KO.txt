@@ -1,0 +1,16 @@
+AT2	Apoe,Il1b,Camp,Ntn1,Nlgn3
+Airway Epithelium	Mif,Igf1,Egf,Apoe,Il1b
+Alveolar Macrophages	Spp1,Igf1,Tnfsf18,Slit2,Ptdss1
+Capillary cells	Agt,Fgf2,Ngf,Adam17,Il1b
+Dendritic cells	Calr,Mapt,Nlgn3,Nlgn1,Il10
+Fibroblasts and Protector cells	Spp1,Edn1,Agt,Tgfb1,Il1b
+Granulocytes	Lama2,Rtn4,Il27,Il21,Camp
+Innate Lymphoid cells	Il12a,Il12b,Ifng,Il18,Il15
+Interstitial Macrophages	Agt,Tnf,Il1a,Il4,Ifng
+Monocytes and M2 Macrophages	Il34,Tnfsf11,Mapt,Apoe,Sectm1a
+NKT cells	Il12b,Il12a,Il18,Ifng,Il21
+Plasma B cells	Tnfsf18,Il4,Celsr2,Cd6,Il2
+T cells	Ifng,Il18,Il12b,Il12a,Il21
+Vascular Endothelial cells	Nlgn1,Nlgn3,Hgf,Ltb,Lrrc4b
+classical Monocytes	Apln,Nlgn1,Nlgn3,Ctf1,Ptn
+non classical Monocytes	Ins2,Mdk,Ccl12,Ifng,Areg

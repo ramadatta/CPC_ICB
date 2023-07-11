@@ -1,0 +1,16 @@
+AT2	Tgfb2,Fgf23,Cmtm8,Ltb,Tnfsf14
+Airway Epithelium	Hmgb2,Calr,App,Mpz,Dsc3
+Alveolar Macrophages	Ifng,App,Tnf,Lama2,Cd24a
+Capillary cells	Tgfb2,Dsc3,Ebi3,App,Cmtm2b
+Dendritic cells	App,Nlgn3,Dsc3,Fgf23,Cd24a
+Fibroblasts and Protector cells	App,Nlgn1,Nlgn3,Mif,Lama2
+Granulocytes	Mif,Apln,Jag1,Lama2,Calr
+Innate Lymphoid cells	App,Hmgb2,Ltf,Lama2,Igf1
+Interstitial Macrophages	Lama2,App,Igf1,Tgfb2,Tnf
+Monocytes and M2 Macrophages	App,Lama2,Igf1,Cd40lg,Itgal
+NKT cells	Dsc3,Tgfb2,Lama2,Bmp5,Calr
+Plasma B cells	Il10,Igf1,Dscam,Dsc3,App
+T cells	Dsc3,Il10,Lama2,Hmgb2,App
+Vascular Endothelial cells	Mif,Calr,Tnf
+classical Monocytes	App,Calr,Nlgn3,Dsc3,Nlgn1
+non classical Monocytes	App,Calr,Hmgb2,Dsc3,Mif

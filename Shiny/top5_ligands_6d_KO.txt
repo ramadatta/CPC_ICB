@@ -1,0 +1,16 @@
+AT2	Fgf23,Ins2,Mpz,Cdh6,Cdh9
+Airway Epithelium	Fgf23,Tnf,Egf,Mmp9,Ccl12
+Alveolar Macrophages	Hmgb2,Ifnk,Il27,Ccl12,Ebi3
+Capillary cells	Ifnk,Il21,Il27,Ebi3,Pdcd1lg2
+Dendritic cells	Ifnk,Il27,Has2,Ebi3,Il1rn
+Fibroblasts and Protector cells	Ifnk,Il27,Ebi3,Il13,Tgfb2
+Granulocytes	Ifnk,Il27,Ifng,Ebi3,Il12a
+Innate Lymphoid cells	Il27,Ifnk,Il12a,Ebi3,Il12b
+Interstitial Macrophages	Tnf,Ifng,Il4,Il13,Adipoq
+Monocytes and M2 Macrophages	Ifng,Il4,Il27,Ifnk,Il18
+NKT cells	Hmgb2,Il12a,Il12b,Il27,Il18
+Plasma B cells	Hmgb2,Il12a,Il27,Il12b,Ifnk
+T cells	Hmgb2,Il12a,Il12b,Il27,Il18
+Vascular Endothelial cells	Selplg,Bmp2,Agt,Cxcl12,Angpt2
+classical Monocytes	Il4,Tnf,Il18,Il27,Ifnk
+non classical Monocytes	Il4,Ntn1,Csf1,Tnfsf11,Il13
