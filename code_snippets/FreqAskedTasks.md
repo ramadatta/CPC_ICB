@@ -4,6 +4,7 @@
 
 
 ## 2. Check the signature across the conditions using specific set of genes using violin plots
+
     # 1. method1:
     sc.pl.violin(adata_Str, ["ACTG2", "ACTA2", "PLN"], groupby="ann_level_3_transferred_label")
     # 2. method2:  
@@ -110,3 +111,21 @@ sc.set_figure_params(figsize=(15, 10))
 
 sc.pl.violin(adata_STR_wo_EMPH, keys='NFATC4_TargetGene_Score', groupby='SEACell_predom_cellstate',
 rotation=90)
+
+
+## 3. Check adata.var in a dictionary and assign a label if present in the dictionary
+``` 
+Convert the 'TF' column from human_tf into a set for quick lookup
+tf_set = set(human_tf['TF'])
+adata_invivo_Endo.var['Regulator'] = adata_invivo_Endo.var_names.map(lambda x: 'TF' if x in tf_set else None)
+```
+
+## 4. Relabel and create a new column
+```
+adata_exvivo_Endo_tf.obs['merged_controls'] = adata_exvivo_Endo_tf.obs['sample'].apply(lambda sample: 'Control' if sample == 'D_zero' or sample.endswith('_CC') else sample)
+```
+
+## 5. Create column by splitting
+```
+adata_exvivo_Endo_tf.obs[['Timepoint', 'Treated']] = adata_exvivo_Endo_tf.obs["merged_controls"].str.split('_',expand=True)
+```
