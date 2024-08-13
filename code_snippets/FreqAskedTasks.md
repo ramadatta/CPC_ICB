@@ -133,3 +133,8 @@ adata_exvivo_Endo_tf.obs[['Timepoint', 'Treated']] = adata_exvivo_Endo_tf.obs["m
 ```
 filtered_upset_up_list = [gene for gene in upset_up_list if gene in adata_exvivo_Epi_tf.var_names]
 ```
+
+### 7. Filter rows with NaN in pandas dataframe
+```
+filtered_df = df[df['MILO_IPFstages'].notnull()]
+```
