@@ -123,6 +123,10 @@ adata_invivo_Endo.var['Regulator'] = adata_invivo_Endo.var_names.map(lambda x: '
 ## 4. Relabel and create a new column
 ```
 adata_exvivo_Endo_tf.obs['merged_controls'] = adata_exvivo_Endo_tf.obs['sample'].apply(lambda sample: 'Control' if sample == 'D_zero' or sample.endswith('_CC') else sample)
+
+adata_exvivo_Epi.obs['fine_annot2'] = adata_exvivo_Epi.obs['fine_annot'].replace({'Aberrant Basaloid': 'Alveolar_epithelium', 
+                                                                                                                 'AT1': 'Alveolar_epithelium', 
+                                                                                                                 'AT2': 'Alveolar_epithelium'})
 ```
 
 ## 5. Create column by splitting
@@ -138,3 +142,8 @@ filtered_upset_up_list = [gene for gene in upset_up_list if gene in adata_exvivo
 ```
 filtered_df = df[df['MILO_IPFstages'].notnull()]
 ```
+### 8. Exclude celltype(s)
+```
+adata_exvivo_Epi = adata_exvivo_Epi[~adata_exvivo_Epi.obs['fine_annot'].isin(['PNEC'])]
+```
+
