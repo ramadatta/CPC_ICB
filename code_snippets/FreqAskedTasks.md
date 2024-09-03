@@ -146,4 +146,19 @@ filtered_df = df[df['MILO_IPFstages'].notnull()]
 ```
 adata_exvivo_Epi = adata_exvivo_Epi[~adata_exvivo_Epi.obs['fine_annot'].isin(['PNEC'])]
 ```
+### 9. Just display particular celltype and rest of celltypes to be grey
+```
+# List of categories
+categories = ["12h_CC", "12h_FC", "24h_FC", "48h_FC", "D4_FC", "D6_CC", "D6_FC", "D_zero"]
 
+# Loop through categories and create UMAP plots
+for category in categories:
+    sc.pl.umap(
+        adata_EpiCells,
+        color=["sample"],
+        groups=category,
+        title=f'{category}',
+        size=10
+    )
+
+```
