@@ -162,3 +162,7 @@ for category in categories:
     )
 
 ```
+### 10. extract DEGs from rank_gene_groups into dataframe
+```
+dedf = sc.get.rank_genes_groups_df(adata_Epi_Alv, group=None)
+```
