@@ -170,4 +170,8 @@ dedf = sc.get.rank_genes_groups_df(adata_Epi_Alv, group=None)
 ```
 random_regulons = [reg.replace('(+)','') for reg in random_regulons]
 ```
-
+### 12. Note
+```
+In some cases, adata_Fibs.X might be a sparse matrix (e.g., scipy.sparse.csr_matrix). If that’s the case, you can convert it to a dense matrix before creating the DataFrame: adata_Fibs.X.toarray()
+If adata_Fibs.X is already a dense numpy.ndarray, then there’s no need to convert it using adata_Fibs.X.toarray()
+```
