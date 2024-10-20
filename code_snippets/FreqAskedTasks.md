@@ -166,3 +166,8 @@ for category in categories:
 ```
 dedf = sc.get.rank_genes_groups_df(adata_Epi_Alv, group=None)
 ```
+### 11. replace a portion of a string from a list 
+```
+random_regulons = [reg.replace('(+)','') for reg in random_regulons]
+```
+
