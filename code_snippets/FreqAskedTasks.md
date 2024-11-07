@@ -230,3 +230,56 @@ plt.legend(title="fine_annot4", loc='center left', bbox_to_anchor=(1.0, 0.5))
 plt.tight_layout()
 plt.show()
 ```
+### 19. Make gif from umaps
+```
+import scanpy as sc
+import matplotlib.pyplot as plt
+from PIL import Image
+import os
+import re
+
+# List of categories
+categories = ["Airway", "AT1", "AT2", "AT2 (SFTPBHi / CSF3RHi)", "AT2/Basaloid Transitional (TP63+/SFTPC+)", "Basaloid (CDH2+, TP63+)"]
+
+# Create a directory to save the images
+output_dir = "./umap_frames"
+os.makedirs(output_dir, exist_ok=True)
+
+# Function to sanitize file names
+def sanitize_filename(name):
+    return re.sub(r'[^\w\-_\. ]', '_', name)  # Replace non-alphanumeric characters with underscores
+
+# Generate UMAP plots and save each as an image
+image_files = []
+for category in categories:
+    sanitized_category = sanitize_filename(category)  # Sanitize the category name for the filename
+    
+    # Plot the UMAP
+    sc.pl.umap(
+        adata_Epi,
+        color=["fine_annot1a"],
+        groups=category,
+        title=f'{category}',
+        size=80,
+        show=False,
+        save=f"_{sanitized_category}.png"  # Save each plot with sanitized filename
+    )
+    
+    # Move the saved plot to the output directory
+    file_name = f"umap_{sanitized_category}.png"
+    os.rename(f"figures/umap_{sanitized_category}.png", os.path.join(output_dir, file_name))
+    image_files.append(os.path.join(output_dir, file_name))
+
+# Create a GIF from the saved images
+gif_output_path = "umap_plots_fine_annot1a.gif"
+with Image.open(image_files[0]) as img:
+    img.save(
+        gif_output_path,
+        save_all=True,
+        append_images=[Image.open(file) for file in image_files[1:]],
+        duration=500,  # Duration of each frame in milliseconds
+        loop=0  # Loop infinitely
+    )
+
+print(f"GIF saved as {gif_output_path}")
+```
