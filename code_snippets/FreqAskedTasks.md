@@ -315,3 +315,54 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 ```
+### 21. Line plot of Mean Gene Expression given a gene across multiple clusters
+```
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def plot_gene_expression(adata, gene_of_interest, cluster_key, plot_size=(10, 6), line_color="blue"):
+    """
+    Plots the mean expression of a specified gene across clusters in a sorted line plot.
+
+    Parameters:
+    - adata: AnnData object
+    - gene_of_interest: str, name of the gene to analyze
+    - cluster_key: str, the key in adata.obs containing cluster labels
+    - plot_size: tuple, size of the plot (default is (10, 6))
+    - line_color: str, color of the line in the plot (default is "blue")
+    
+    Returns:
+    - None, but displays a line plot
+    """
+    if gene_of_interest in adata.var_names:
+        # Extract the cluster and gene expression data
+        expression_data = adata[:, gene_of_interest].X
+        cluster_data = adata.obs[cluster_key]
+
+        # Create a DataFrame for easy manipulation
+        df = pd.DataFrame({
+            "Cluster": cluster_data,
+            "Expression": expression_data.toarray().flatten() if hasattr(expression_data, "toarray") else expression_data.flatten()
+        })
+
+        # Calculate the mean expression per cluster
+        mean_expression = df.groupby("Cluster")["Expression"].mean()
+
+        # Sort clusters by mean expression
+        mean_expression_sorted = mean_expression.sort_values()
+
+        # Plot the sorted mean expression as a line plot
+        plt.figure(figsize=plot_size)
+        mean_expression_sorted.plot(kind="line", marker="o", color=line_color)
+        plt.xticks(range(len(mean_expression_sorted)), mean_expression_sorted.index, rotation=0)
+        plt.title(f"Mean Expression of {gene_of_interest} Across Clusters (Sorted by Expression)")
+        plt.xlabel("Cluster (Sorted by Mean Expression, Lowest to Highest)")
+        plt.ylabel("Mean Expression")
+        plt.grid(False)
+        plt.tight_layout()  # Adjust layout for better fit
+        plt.show()
+    else:
+        print(f"Gene {gene_of_interest} not found in adata.")
+
+plot_gene_expression(adata, gene_of_interest="TP63", cluster_key="epi_harmony_leiden_cycle1_res200", plot_size=(10, 6), line_color="green")
+```
