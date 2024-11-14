@@ -72,9 +72,15 @@
     `sc.pp.scale(adata, max_value=10)`
 ```    
 
-### 4. Line plots of gene expression acroos the timepoints
+### 4. Line plots of gene expression across the timepoints
+```   
+    Refer 21 for single gene
+``` 
 
-### 5. Line of gene expression by each donor across the timepoints
+### 5. Line plots of gene expression by each donor across the timepoints
+```   
+    Refer 21 for single gene
+``` 
 
 ### 6. Matrix plot with mean z score
 ```
