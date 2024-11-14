@@ -106,24 +106,14 @@ pbmc.layers["scaled"] = sc.pp.scale(pbmc, copy=True).X`
 
 ### 7. Plot Gene Signature
 ```
-# `Genes list for cell type "SMC" (Smooth Muscle Cells)`
+genes_of_interest = ["TP63","CDH2"]
 
-`genes_of_interest = adj_str_df_NFATC4_top20.target.tolist()`
+sc.tl.score_genes(adata, gene_list = genes_of_interest, score_name = "Basaloid_Score")
+sc.pl.umap(adata, color = "Basaloid_Score", cmap = "Reds", size = 10)
 
-`sc.tl.score_genes(adata_STR_wo_EMPH, gene_list = genes_of_interest, score_name = "NFATC4_TargetGene_Score")`
-
-`sc.pl.umap(adata_STR_wo_EMPH, color = "NFATC4_TargetGene_Score", cmap = "Reds", size = 10)`
-
-1. we can also draw violin plot using the gene signature
 
 sc.set_figure_params(figsize=(15, 10))
-
-# Assuming 'cell_type' is the column in adata.obs that categorizes cells into different types
-
-# Ensure 'NFATC4_TargetGene_Score' is in adata.obs and 'cell_type' is correctly set up
-
-sc.pl.violin(adata_STR_wo_EMPH, keys='NFATC4_TargetGene_Score', groupby='SEACell_predom_cellstate',
-rotation=90)
+sc.pl.violin(adata, keys='Basaloid_Score', groupby='epi_harmony_leiden_cycle1_res200', rotation=90)
 ```
 
 ## 8. Check adata.var in a dictionary and assign a label if present in the dictionary
