@@ -283,3 +283,35 @@ with Image.open(image_files[0]) as img:
 
 print(f"GIF saved as {gif_output_path}")
 ```
+### 20. Line plot from Gene Signature Score
+```
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Reorder the timepoints to ensure the correct order in the plot
+ordered_timepoints = ['Control', '12h_FC', '24h_FC', '48h_FC', 'D4_FC', 'D6_FC']
+data_df['Timepoint'] = pd.Categorical(data_df['Timepoint'], categories=ordered_timepoints, ordered=True)
+data_df = data_df.sort_values('Timepoint')
+
+# Calculate the mean score for each timepoint for both metrics
+avg_scores = data_df.groupby('Timepoint').mean().reset_index()
+
+# Plot both scores on the same line plot
+plt.figure(figsize=(10, 6))
+
+# Plotting Ectopic_EC_Score
+plt.plot(avg_scores['Timepoint'], avg_scores['Ectopic_EC_Score'], marker='o', linestyle='-', color='blue', label='Ectopic EC Score')
+
+# Plotting Ectopic_EC_2_3_DriverGeneScore
+plt.plot(avg_scores['Timepoint'], avg_scores['Ectopic_EC_5_DriverGeneScore'], marker='o', linestyle='-', color='red', label='Ectopic EC 5 Driver Gene Score')
+
+# Customize plot
+plt.xlabel('Timepoint')
+plt.ylabel('Average Score')
+plt.title('Comparison of Ectopic EC Scores Across Timepoints')
+plt.xticks(rotation=90)
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+```
