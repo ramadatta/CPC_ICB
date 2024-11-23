@@ -364,10 +364,13 @@ plot_gene_expression(adata, gene_of_interest="TP63", cluster_key="epi_harmony_le
 ```
 ### 22. Line plot of Mean Gene Expression given set of gene across multiple timepoints in order
 ```
-def plot_combined_gene_lines_custom_order(adata, genes_of_interest, cluster_key, timepoints, plot_size=(12, 6), cc_color="blue", fc_color="red"):
+def plot_combined_gene_lines_custom_order_adjusted_labels(adata, genes_of_interest, cluster_key, timepoints,
+                                                          plot_size=(12, 6), cc_color="blue", fc_color="red",
+                                                         angle=90):
     """
     Plots the mean expression of multiple genes across clusters in a line plot,
-    in a custom order defined by `timepoints`.
+    with `CC` clusters appearing first on the x-axis, followed by `FC`, in a custom order.
+    Annotates gene names at the end of the lines with adjusted positions using `adjustText`.
     
     Parameters:
     - adata: AnnData object
@@ -396,35 +399,54 @@ def plot_combined_gene_lines_custom_order(adata, genes_of_interest, cluster_key,
     # Calculate mean expression per cluster
     mean_expression = expression_data.groupby("Cluster").mean()
 
-    # Filter and order clusters based on timepoints
-    ordered_clusters = [cluster for cluster in timepoints if cluster in mean_expression.index]
+    # Filter and separate `CC` and `FC` clusters based on timepoints
+    cc_clusters = [cluster for cluster in timepoints if "CC" in cluster and cluster in mean_expression.index]
+    fc_clusters = [cluster for cluster in timepoints if "FC" in cluster and cluster in mean_expression.index]
+
+    # Combine the ordered clusters: CC first, then FC
+    ordered_clusters = cc_clusters + fc_clusters
     mean_expression = mean_expression.loc[ordered_clusters]
 
-    # Separate CC and FC clusters
-    cc_clusters = [cluster for cluster in ordered_clusters if "CC" in cluster]
-    fc_clusters = [cluster for cluster in ordered_clusters if "FC" in cluster]
+    # Map cluster labels to numeric positions for proper alignment
+    cluster_positions = {cluster: idx for idx, cluster in enumerate(ordered_clusters)}
 
-    # Plot the data
+    # Initialize the plot
     plt.figure(figsize=plot_size)
+
+    # Collect texts for adjustment
+    texts = []
 
     # Plot CC clusters
     for gene in valid_genes:
-        plt.plot(cc_clusters, mean_expression.loc[cc_clusters, gene], marker="o", linestyle="-", color=cc_color, label=f"{gene} (CC)")
+        x_coords = [cluster_positions[cluster] for cluster in cc_clusters]
+        plt.plot(x_coords, mean_expression.loc[cc_clusters, gene], marker="o", linestyle="-", color=cc_color)
+        # Add text annotations for CC clusters
+        texts.append(plt.text(x_coords[-1] + 0.1, mean_expression.loc[cc_clusters[-1], gene], f"{gene}", color=cc_color, fontsize=10, va="center"))
 
     # Plot FC clusters
     for gene in valid_genes:
-        plt.plot(fc_clusters, mean_expression.loc[fc_clusters, gene], marker="o", linestyle="--", color=fc_color, label=f"{gene} (FC)")
+        x_coords = [cluster_positions[cluster] for cluster in fc_clusters]
+        plt.plot(x_coords, mean_expression.loc[fc_clusters, gene], marker="o", linestyle="--", color=fc_color)
+        # Add text annotations for FC clusters
+        texts.append(plt.text(x_coords[-1] + 0.1, mean_expression.loc[fc_clusters[-1], gene], f"{gene}", color=fc_color, fontsize=10, va="center"))
+
+    # Adjust text to prevent overlap
+    adjust_text(texts, arrowprops=dict(arrowstyle="->", color="gray", lw=0.5))
 
     # Customize the plot
-    plt.title("Mean Expression of Genes Across Clusters (Custom Order)")
+    plt.title("Mean Expression of Genes Across Timepoints")
     plt.xlabel("Clusters")
     plt.ylabel("Mean Expression")
-    plt.xticks(rotation=45)
-    plt.legend(title="Genes and Group", loc="upper left", bbox_to_anchor=(1, 1))
+    plt.xticks(ticks=list(cluster_positions.values()), labels=ordered_clusters, rotation=angle)
     plt.tight_layout()
     plt.show()
 
-timepoints = ['12h_CC', '12h_FC', '24h_FC', '48h_FC', 'D4_CC', 'D4_FC', 'D6_CC', 'D6_FC']
-plot_combined_gene_lines_custom_order(adata_Endo, gene_of_int, cluster_key="sample", timepoints=timepoints)
+
+plot_combined_gene_lines_custom_order_adjusted_labels(
+    adata_Endo,
+    genes_of_interest=gene_of_int_CC,
+    cluster_key="sample",
+    timepoints=timepoints
+)
 ```
 
