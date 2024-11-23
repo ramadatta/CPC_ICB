@@ -362,3 +362,69 @@ def plot_gene_expression(adata, gene_of_interest, cluster_key, plot_size=(10, 6)
 
 plot_gene_expression(adata, gene_of_interest="TP63", cluster_key="epi_harmony_leiden_cycle1_res200", plot_size=(10, 6), line_color="green")
 ```
+### 22. Line plot of Mean Gene Expression given set of gene across multiple timepoints in order
+```
+def plot_combined_gene_lines_custom_order(adata, genes_of_interest, cluster_key, timepoints, plot_size=(12, 6), cc_color="blue", fc_color="red"):
+    """
+    Plots the mean expression of multiple genes across clusters in a line plot,
+    in a custom order defined by `timepoints`.
+    
+    Parameters:
+    - adata: AnnData object
+    - genes_of_interest: list of str, gene names to plot
+    - cluster_key: str, the key in adata.obs containing cluster labels
+    - timepoints: list of str, desired cluster order
+    - plot_size: tuple, size of the plot (default is (12, 6))
+    - cc_color: str, color for CC groups (default is "blue")
+    - fc_color: str, color for FC groups (default is "red")
+    
+    Returns:
+    - None, but displays a line plot
+    """
+    # Check for genes in adata
+    missing_genes = [gene for gene in genes_of_interest if gene not in adata.var_names]
+    if missing_genes:
+        print(f"Warning: Missing genes in adata: {missing_genes}")
+
+    # Filter for available genes
+    valid_genes = [gene for gene in genes_of_interest if gene in adata.var_names]
+
+    # Extract expression data and cluster labels
+    expression_data = adata[:, valid_genes].to_df()
+    expression_data["Cluster"] = adata.obs[cluster_key]
+
+    # Calculate mean expression per cluster
+    mean_expression = expression_data.groupby("Cluster").mean()
+
+    # Filter and order clusters based on timepoints
+    ordered_clusters = [cluster for cluster in timepoints if cluster in mean_expression.index]
+    mean_expression = mean_expression.loc[ordered_clusters]
+
+    # Separate CC and FC clusters
+    cc_clusters = [cluster for cluster in ordered_clusters if "CC" in cluster]
+    fc_clusters = [cluster for cluster in ordered_clusters if "FC" in cluster]
+
+    # Plot the data
+    plt.figure(figsize=plot_size)
+
+    # Plot CC clusters
+    for gene in valid_genes:
+        plt.plot(cc_clusters, mean_expression.loc[cc_clusters, gene], marker="o", linestyle="-", color=cc_color, label=f"{gene} (CC)")
+
+    # Plot FC clusters
+    for gene in valid_genes:
+        plt.plot(fc_clusters, mean_expression.loc[fc_clusters, gene], marker="o", linestyle="--", color=fc_color, label=f"{gene} (FC)")
+
+    # Customize the plot
+    plt.title("Mean Expression of Genes Across Clusters (Custom Order)")
+    plt.xlabel("Clusters")
+    plt.ylabel("Mean Expression")
+    plt.xticks(rotation=45)
+    plt.legend(title="Genes and Group", loc="upper left", bbox_to_anchor=(1, 1))
+    plt.tight_layout()
+    plt.show()
+
+timepoints = ['12h_CC', '12h_FC', '24h_FC', '48h_FC', 'D4_CC', 'D4_FC', 'D6_CC', 'D6_FC']
+plot_combined_gene_lines_custom_order(adata_Endo, gene_of_int, cluster_key="sample", timepoints=timepoints)
+```
+
