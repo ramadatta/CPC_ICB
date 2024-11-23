@@ -449,4 +449,18 @@ plot_combined_gene_lines_custom_order_adjusted_labels(
     timepoints=timepoints
 )
 ```
+### 23. Violin plot for subset clusters
+```
+# Specify the two cell types to compare
+celltypes_to_compare = ["Ectopic EC (PLVAP/VWA1)", "Ectopic EC (VWF)"]
 
+# Subset the AnnData object to include only these cell types
+adata_temp = adata_Endo[adata_Endo.obs["fine_annot4b"].isin(celltypes_to_compare)]
+
+# Plot the violin plot
+sc.pl.violin(
+    adata_temp,
+    gene_of_int_CC, ## Ectopic EC in CC 
+    groupby="fine_annot4b"
+)
+```
