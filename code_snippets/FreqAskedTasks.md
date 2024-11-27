@@ -464,3 +464,13 @@ sc.pl.violin(
     groupby="fine_annot4b"
 )
 ```
+### 24. Melt a matrix (Wide) to Long Format
+```
+# Reshape the wide DataFrame into long format
+ulm_estimate_long = adata.obsm['ulm_estimate'].reset_index().melt(
+    id_vars='index', var_name='Gene', value_name='Value'
+)
+
+# Rename the `index` column to `Cell`
+ulm_estimate_long.rename(columns={'index': 'Cell'}, inplace=True)
+```
