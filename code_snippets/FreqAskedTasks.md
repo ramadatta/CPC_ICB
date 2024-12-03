@@ -474,3 +474,59 @@ ulm_estimate_long = adata.obsm['ulm_estimate'].reset_index().melt(
 # Rename the `index` column to `Cell`
 ulm_estimate_long.rename(columns={'index': 'Cell'}, inplace=True)
 ```
+
+### 25. Check the sizes of adata components and layers
+```
+from scipy.sparse import issparse
+
+# Check if adata.X is sparse
+if issparse(adata_wo_Cil_Deu.X):
+    X_nbytes = (
+        adata_wo_Cil_Deu.X.data.nbytes +
+        adata_wo_Cil_Deu.X.indices.nbytes +
+        adata_wo_Cil_Deu.X.indptr.nbytes
+    )
+    print(f"X: {X_nbytes / 1e9:.2f} GB (sparse matrix)")
+else:
+    print(f"X: {adata_wo_Cil_Deu.X.nbytes / 1e9:.2f} GB (dense matrix)")
+
+# Check the size of obs
+obs_nbytes = adata_wo_Cil_Deu.obs.memory_usage(deep=True).sum()
+print(f"obs: {obs_nbytes / 1e6:.2f} MB")
+
+# Check the size of var
+var_nbytes = adata_wo_Cil_Deu.var.memory_usage(deep=True).sum()
+print(f"var: {var_nbytes / 1e6:.2f} MB")
+
+# Check the size of uns
+import sys
+
+uns_nbytes = sum(sys.getsizeof(adata_wo_Cil_Deu.uns[key]) for key in adata_wo_Cil_Deu.uns.keys())
+print(f"uns: {uns_nbytes / 1e6:.2f} MB")
+
+# Check the size of layers
+layers_nbytes = 0
+for layer_name, layer_data in adata_wo_Cil_Deu.layers.items():
+    if issparse(layer_data):
+        layer_nbytes = (
+            layer_data.data.nbytes +
+            layer_data.indices.nbytes +
+            layer_data.indptr.nbytes
+        )
+    else:
+        layer_nbytes = layer_data.nbytes
+    layers_nbytes += layer_nbytes
+print(f"layers: {layers_nbytes / 1e9:.2f} GB")
+
+
+# Check the size of each layer in adata
+from scipy.sparse import issparse
+
+# Iterate over layers to compute their sizes
+for layer_name, layer in adata_wo_Cil_Deu.layers.items():
+    if issparse(layer):
+        print(f"Layer {layer_name}: {layer.data.nbytes / 1e9:.2f} GB (sparse)")
+    else:
+        print(f"Layer {layer_name}: {layer.nbytes / 1e9:.2f} GB (dense)")
+```
+
