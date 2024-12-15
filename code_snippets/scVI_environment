@@ -1,0 +1,5 @@
+pip install jaxlib==0.4.13
+pip install jax==0.4.13
+pip install numpyro==0.12.1
+pip install chex==0.1.82
+pip install optax==0.2.0
