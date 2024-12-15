@@ -1,0 +1,3 @@
+pip install -U scarches
+pip install --upgrade chex
+Successfully installed chex-0.1.88
