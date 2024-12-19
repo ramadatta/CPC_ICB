@@ -185,34 +185,28 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-# Sample data
-# Assume adata_Endo.obs[["fine_annot4","condition_1c_Timepoints_Control"]] is already in the correct DataFrame format
-data = adata_Endo.obs[["fine_annot4", "condition_1c_Timepoints_Control"]]
-
-# Define the order for the x-axis
-condition_order = ['Control', '12h_FC', '24h_FC', '48h_FC', 'D4_FC', 'D6_FC']
+# Extract the color mapping from adata.uns
+fine_annot2b_categories = adata.obs["fine_annot2b"].cat.categories
+fine_annot2b_colors = adata.uns["fine_annot2b_colors"]
 
 # Calculate proportions
-proportions = data.groupby(["condition_1c_Timepoints_Control", "fine_annot4"]).size().unstack(fill_value=0)
-proportions = proportions.div(proportions.sum(axis=1), axis=0)  # Convert counts to proportions
-proportions = proportions.reindex(condition_order, axis=0).fillna(0)  # Reorder by condition order
+condition_order = ['12h_CC','D4_CC', 'D6_CC', '12h_FC', '24h_FC', '48h_FC', 'D4_FC', 'D6_FC']
+proportions = adata.obs.groupby(["sample", "fine_annot2b"]).size().unstack(fill_value=0)
+proportions = proportions.div(proportions.sum(axis=1), axis=0)
+proportions = proportions.reindex(condition_order, axis=0).fillna(0)
 
-# Define a custom color palette as specified by the user
-custom_palette = [
-    '#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6',
-    '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3',
-    '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000'
-]
+# Match colors to categories
+colors = [fine_annot2b_colors[fine_annot2b_categories.get_loc(cat)] for cat in proportions.columns]
 
-# Plotting with the custom color palette and proportion labels
-plt.figure(figsize=(10, 6))
-ax = proportions.plot(kind='bar', stacked=True, color=custom_palette[:len(proportions.columns)], ax=plt.gca())
+# Plot the stacked bar chart
+plt.figure(figsize=(12, 8))
+ax = proportions.plot(kind='bar', stacked=True, color=colors, ax=plt.gca())
 plt.xlabel("Condition")
 plt.ylabel("Proportion")
-plt.title("Proportion of fine_annot4 across Condition Timepoints")
+plt.title("Proportion of fine_annot2b across Condition Timepoints")
 plt.xticks(rotation=90)
 
-# Add proportion numbers on each bar segment
+# Add proportion labels
 for i, condition in enumerate(condition_order):
     cumulative_height = 0
     for j, category in enumerate(proportions.columns):
@@ -221,10 +215,17 @@ for i, condition in enumerate(condition_order):
             ax.text(i, cumulative_height + value / 2, f'{value:.2f}', ha='center', va='center', fontsize=8)
         cumulative_height += value
 
-# Place the legend within the figure
-plt.legend(title="fine_annot4", loc='center left', bbox_to_anchor=(1.0, 0.5))
+# Customize the legend
+plt.legend(
+    title="fine_annot2b",
+    labels=proportions.columns,
+    loc='center left',
+    bbox_to_anchor=(1.0, 0.5)
+)
+plt.grid(False)
 plt.tight_layout()
 plt.show()
+
 ```
 ### 19. Make gif from umaps
 ```
