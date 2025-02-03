@@ -603,3 +603,26 @@ def get_markers(
     
     return markers
 ```
+### 27. Annotate clusters in scanpy
+```
+types = {
+    "AT1": ["16","26", "17", "11", "1","21"], # 17 with pinch of salt
+     "AT2-AT1 differentiating": ["26"],
+    "Basaloid Transitional":[ "5", "9"],
+    "AT2 (TRB-SC/AT0-like)" : ["20","4","12"],
+    "Basaloid": ["3", "19"],
+    "AT2": ["0", "2", "6","14", "15","25","7", "10", "18", "22", "24"],  
+    "Airway" : ["8", "13", "23"],
+    # "Club": ["3", "4"],
+    # "Goblet": ["3", "4"],
+    # "Ciliated": ["23"],
+}
+
+
+# Create a dictionary to map cluster numbers to cell types
+cluster_to_cell_type = {cluster_num: cell_type for cell_type, cluster_list in types.items() for cluster_num in cluster_list}
+
+# Create a new column in adata.obs with cell types based on leiden_res2
+adata.obs["fine_annot2a"] = [cluster_to_cell_type[i] for i in adata.obs["epi_harmony_leiden_cycle1_res200"]]
+adata.obs["fine_annot2a"].value_counts()
+```
