@@ -1,4 +1,4 @@
-# Frequently asked tasks
+# Regularly Requested Tasks 
 
 ## 1. Dotplot for a single gene across celltypes and conditions 
 
