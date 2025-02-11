@@ -626,3 +626,15 @@ cluster_to_cell_type = {cluster_num: cell_type for cell_type, cluster_list in ty
 adata.obs["fine_annot2a"] = [cluster_to_cell_type[i] for i in adata.obs["epi_harmony_leiden_cycle1_res200"]]
 adata.obs["fine_annot2a"].value_counts()
 ```
+
+### 28. Matrixplot Rank Gene Groups
+```
+sc.pl.rank_genes_groups_matrixplot(
+    adata_Epi_Scenic,
+    n_genes=5,
+    key="Scenic_Regulon_markers_fine_annot2b",
+    groupby = "fine_annot2b",
+    standard_scale="var"
+)
+
+```
