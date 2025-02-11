@@ -638,3 +638,8 @@ sc.pl.rank_genes_groups_matrixplot(
 )
 
 ```
+
+### 29. Top genes from scanpy dataframe
+```
+top10_by_celltype = drdf.groupby("group").apply(lambda x: x.nlargest(10, "scores")).reset_index(drop=True)
+```
