@@ -72,9 +72,98 @@
     `sc.pp.scale(adata, max_value=10)`
 ```    
 
-### 4. Line plots of gene expression across the timepoints
+### 4. Line plots of gene expression across the timepoints 1 plot 1 gene (Refer 21 for a single gene)
 ```   
-    Refer 21 for single gene
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import numpy as np
+from adjustText import adjust_text
+
+def plot_gene_expression_over_time_sepPlot(
+    adata, genes_of_interest, cluster_key, timepoints,
+    plot_size=(8, 5), angle=90, colormap="tab10", label_fontsize=12
+):
+    """
+    Plots the mean expression of a single gene across clusters in separate plots.
+    Each gene is plotted individually with its own line.
+
+    Parameters:
+    - adata: AnnData object
+    - genes_of_interest: list of str, gene names to plot (each will get its own plot)
+    - cluster_key: str, the key in adata.obs containing cluster labels
+    - timepoints: list of str, desired cluster order
+    - plot_size: tuple, size of each plot (default is (8, 5))
+    - angle: int, rotation angle for x-axis labels (default is 90)
+    - colormap: str, matplotlib colormap name for gene colors (default is "tab10")
+    - label_fontsize: int, font size for gene labels (default is 12)
+
+    Returns:
+    - None, but displays separate plots for each gene.
+    """
+
+    # Check for missing genes in adata
+    missing_genes = [gene for gene in genes_of_interest if gene not in adata.var_names]
+    if missing_genes:
+        print(f"Warning: Missing genes in adata: {missing_genes}")
+
+    # Filter for available genes
+    valid_genes = [gene for gene in genes_of_interest if gene in adata.var_names]
+
+    # Extract expression data and cluster labels
+    expression_data = adata[:, valid_genes].to_df()
+    expression_data["Cluster"] = adata.obs[cluster_key]
+
+    # Calculate mean expression per cluster
+    mean_expression = expression_data.groupby("Cluster").mean()
+
+    # Filter and separate `CC` and `FC` clusters based on timepoints
+    cc_clusters = [cluster for cluster in timepoints if "CC" in cluster and cluster in mean_expression.index]
+    fc_clusters = [cluster for cluster in timepoints if "FC" in cluster and cluster in mean_expression.index]
+
+    # Combine the ordered clusters: CC first, then FC
+    ordered_clusters = cc_clusters + fc_clusters
+    mean_expression = mean_expression.loc[ordered_clusters]
+
+    # Map cluster labels to numeric positions for proper alignment
+    cluster_positions = {cluster: idx for idx, cluster in enumerate(ordered_clusters)}
+
+    # Generate unique colors for each gene using a colormap
+    cmap = cm.get_cmap(colormap, len(valid_genes))
+    gene_colors = {gene: cmap(i) for i, gene in enumerate(valid_genes)}
+
+    # Loop through each gene and plot it separately
+    for gene in valid_genes:
+        plt.figure(figsize=plot_size)
+
+        x_coords_cc = [cluster_positions[cluster] for cluster in cc_clusters]
+        x_coords_fc = [cluster_positions[cluster] for cluster in fc_clusters]
+
+        # Plot CC clusters with solid lines
+        plt.plot(x_coords_cc, mean_expression.loc[cc_clusters, gene], marker="o", linestyle="-", color=gene_colors[gene], label="CC")
+
+        # Plot FC clusters with dashed lines
+        plt.plot(x_coords_fc, mean_expression.loc[fc_clusters, gene], marker="o", linestyle="--", color=gene_colors[gene], label="FC")
+
+        # Add text annotations at the end of each line
+        if cc_clusters:
+            plt.text(x_coords_cc[-1] + 0.1, mean_expression.loc[cc_clusters[-1], gene],
+                     f"{gene}", color=gene_colors[gene], fontsize=label_fontsize, va="center")
+
+        if fc_clusters:
+            plt.text(x_coords_fc[-1] + 0.1, mean_expression.loc[fc_clusters[-1], gene],
+                     f"{gene}", color=gene_colors[gene], fontsize=label_fontsize, va="center")
+
+        # Customize the plot
+        plt.title(f"Mean Expression of {gene} Across Timepoints")
+        plt.xlabel("Clusters")
+        plt.ylabel("Mean Expression")
+        plt.xticks(ticks=list(cluster_positions.values()), labels=ordered_clusters, rotation=angle)
+        plt.legend()
+        plt.tight_layout()
+
+        # Show the plot
+        plt.show()
+
 ``` 
 
 ### 5. Line plots of gene expression by each donor across the timepoints
