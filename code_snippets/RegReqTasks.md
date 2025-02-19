@@ -732,3 +732,12 @@ sc.pl.rank_genes_groups_matrixplot(
 ```
 top10_by_celltype = drdf.groupby("group").apply(lambda x: x.nlargest(10, "scores")).reset_index(drop=True)
 ```
+
+### 30. Save high quality images from Scanpy
+```
+# Overall celltype
+sc.set_figure_params(figsize=(10,10), dpi=150, dpi_save=600)
+# This one
+markers = ['NKX2-1']
+sc.pl.umap(adata_siRNA_epi, color=markers, cmap=grey_red, save="NKX2-1.png", size=60)
+```
