@@ -718,6 +718,7 @@ adata.obs["fine_annot2a"].value_counts()
 
 ### 28. Matrixplot Rank Gene Groups
 ```
+sc.tl.rank_genes_groups(adata, "fine_annot2a", method="wilcoxon")
 sc.pl.rank_genes_groups_matrixplot(
     adata_Epi_Scenic,
     n_genes=5,
