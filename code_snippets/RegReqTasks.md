@@ -741,3 +741,9 @@ sc.set_figure_params(figsize=(10,10), dpi=150, dpi_save=600)
 markers = ['NKX2-1']
 sc.pl.umap(adata_siRNA_epi, color=markers, cmap=grey_red, save="NKX2-1.png", size=60)
 ```
+### 31. Extract gene signatures from Scanpy
+```
+dedf = sc.get.rank_genes_groups_df(adata, group=None)
+top_100_per_group = dedf.groupby("group").head(100)[["group", "names"]]
+top_100_per_group.to_csv("invivo_immune_top_100_per_group.csv", index=False)
+```
