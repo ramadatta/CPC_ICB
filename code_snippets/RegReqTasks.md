@@ -748,3 +748,12 @@ dedf = sc.get.rank_genes_groups_df(adata, group=None)
 top_100_per_group = dedf.groupby("group").head(100)[["group", "names"]]
 top_100_per_group.to_csv("invivo_immune_top_100_per_group.csv", index=False)
 ```
+
+### 32. Subcluster then run this
+```
+sc.pp.highly_variable_genes(adata_trans)
+sc.pp.pca(adata_trans, n_comps=50, use_highly_variable=True, svd_solver="arpack")
+sc.pp.neighbors(adata_trans, use_rep="X_scVI_2k")
+sc.tl.umap(adata_trans)
+sc.tl.leiden(adata_trans, resolution = 0.5, key_added = "siRNA_epi_trans_leiden_res50")
+```
