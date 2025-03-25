@@ -757,3 +757,8 @@ sc.pp.neighbors(adata_trans, use_rep="X_scVI_2k")
 sc.tl.umap(adata_trans)
 sc.tl.leiden(adata_trans, resolution = 0.5, key_added = "siRNA_epi_trans_leiden_res50")
 ```
+
+### 33. Bigger R plots in JupyterLab
+```
+options(repr.plot.width = 15, repr.plot.height = 10, repr.plot.res = 300)
+```
