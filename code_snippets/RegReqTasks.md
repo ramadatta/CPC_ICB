@@ -762,3 +762,8 @@ sc.tl.leiden(adata_trans, resolution = 0.5, key_added = "siRNA_epi_trans_leiden_
 ```
 options(repr.plot.width = 15, repr.plot.height = 10, repr.plot.res = 300)
 ```
+
+### 34. Automatically check the genes present in adata or not and plot only those exist
+```
+var_names=[g for g in genelist if g in adata.var_names],
+```
