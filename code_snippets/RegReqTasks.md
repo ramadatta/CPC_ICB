@@ -751,11 +751,17 @@ top_100_per_group.to_csv("invivo_immune_top_100_per_group.csv", index=False)
 
 ### 32. Subcluster then run this
 ```
-sc.pp.highly_variable_genes(adata_trans)
-sc.pp.pca(adata_trans, n_comps=50, use_highly_variable=True, svd_solver="arpack")
-sc.pp.neighbors(adata_trans, use_rep="X_scVI_2k")
-sc.tl.umap(adata_trans)
-sc.tl.leiden(adata_trans, resolution = 0.5, key_added = "siRNA_epi_trans_leiden_res50")
+%%time
+print("HVG")
+sc.pp.highly_variable_genes(adata_AT1)
+print("PCA")
+sc.pp.pca(adata_AT1, n_comps=50, use_highly_variable=True, svd_solver="arpack")
+print("Neighbors")
+sc.pp.neighbors(adata_AT1, use_rep="X_pca_harmony")
+print("UMAP")
+sc.tl.umap(adata_AT1)
+print("leiden")
+sc.tl.leiden(adata_AT1, resolution = 0.5, key_added = "AT1_leiden_res50")
 ```
 
 ### 33. Bigger R plots in JupyterLab
