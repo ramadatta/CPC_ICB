@@ -773,3 +773,15 @@ options(repr.plot.width = 15, repr.plot.height = 10, repr.plot.res = 300)
 ```
 var_names=[g for g in genelist if g in adata.var_names],
 ```
+
+### 35. Seurat object to h5ad conversion
+```
+# This is an alternative to sceasy
+library(Seurat)
+library(SeuratDisk)
+seurat_obj <- readRDS("GSE135893_ILD_annotated_fullsize.rds")
+SaveH5Seurat(seurat_obj, filename = "GSE135893_ILD_annotated_fullsize.h5Seurat")
+seurat_obj <- UpdateSeuratObject(seurat_obj)
+SaveH5Seurat(seurat_obj, filename = "GSE135893_ILD_annotated_fullsize.h5Seurat")
+Convert("GSE135893_ILD_annotated_fullsize.h5Seurat", dest = "h5ad", overwrite = TRUE)
+```
