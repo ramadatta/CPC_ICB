@@ -791,3 +791,194 @@ Convert("GSE135893_ILD_annotated_fullsize.h5Seurat", dest = "h5ad", overwrite = 
 from matplotlib import colors
 grey_red = colors.LinearSegmentedColormap.from_list("grouping", ["lightgray", "red", "darkred"], N=128)
 ```
+
+### 37. Boxplot and Significantly expressed genes from adata
+```
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+from scipy.stats import mannwhitneyu
+import numpy as np
+
+def plot_genes_with_significance(adata, genes, groupby, palette='Set2', add_jitter=True, jitter_width=0.2, 
+                                point_size=5, point_alpha=0.5, font_scale=1.2, annotate_sig=True,
+                                ref_group=None, pairwise_to_ref=True,
+                                title_fontsize=14, label_fontsize=12, tick_fontsize=10,
+                                sig_fontsize=12, pval_fontsize=10, bar_linewidth=1.5,
+                                box_width=0.5, box_saturation=0.8, box_linewidth=1.5,
+                                fig_width_per_gene=5, fig_height=5, group_spacing=1.0,
+                                xtick_rotation=0):
+    """
+    Enhanced gene expression boxplot with significance testing.
+    
+    Parameters:
+    - adata: AnnData object
+    - genes: list of gene names to plot
+    - groupby: column in adata.obs for grouping
+    - palette: seaborn color palette name
+    - add_jitter: bool, whether to add jittered points
+    - jitter_width: width of jitter (uniform distribution)
+    - point_size: size parameter for points (will be used as s=point_size**2 in scatter)
+    - point_alpha: alpha transparency of points
+    - font_scale: overall font scale for seaborn theme
+    - annotate_sig: bool, whether to annotate significance on plot instead of title
+    - ref_group: str, reference group for comparisons (if None, uses first unique group)
+    - pairwise_to_ref: bool, whether to compare each group to reference (for >2 groups)
+    - title_fontsize: fontsize for plot title (header fontsize)
+    - label_fontsize: fontsize for x and y labels
+    - tick_fontsize: fontsize for tick labels
+    - sig_fontsize: fontsize for significance stars
+    - pval_fontsize: fontsize for p-value text (if shown)
+    - bar_linewidth: linewidth for significance bars
+    - box_width: width of boxplots
+    - box_saturation: desaturation of box colors (0-1)
+    - box_linewidth: linewidth of box outlines
+    - fig_width_per_gene: width per gene subplot
+    - fig_height: height of the figure
+    - group_spacing: spacing between group positions
+    - xtick_rotation: rotation angle for x tick labels
+    """
+    sns.set_theme(style='whitegrid', font_scale=font_scale)
+    fig, axes = plt.subplots(1, len(genes), figsize=(fig_width_per_gene * len(genes), fig_height))
+    if len(genes) == 1:
+        axes = [axes]
+    
+    for i, gene in enumerate(genes):
+        expr = adata[:, gene].X.toarray().ravel()
+        df = pd.DataFrame({'Expression': expr, 'Group': adata.obs[groupby]})
+        
+        # Sort groups for consistent ordering
+        groups = sorted(df['Group'].unique())
+        n_groups = len(groups)
+        positions = np.arange(n_groups) * group_spacing
+        df['Group'] = pd.Categorical(df['Group'], categories=groups, ordered=True)
+        
+        # Prepare data list for boxplot
+        data_list = [df[df['Group'] == g]['Expression'].values for g in groups]
+        
+        # Colors
+        colors = sns.color_palette(palette, n_colors=n_groups, desat=box_saturation)
+        
+        # Boxplot properties
+        boxprops = {'linewidth': box_linewidth}
+        whiskerprops = {'linewidth': box_linewidth}
+        capprops = {'linewidth': box_linewidth}
+        medianprops = {'linewidth': box_linewidth}
+        
+        # Matplotlib boxplot
+        bp = axes[i].boxplot(data_list, positions=positions, widths=box_width, patch_artist=True,
+                             showfliers=False, boxprops=boxprops, whiskerprops=whiskerprops,
+                             capprops=capprops, medianprops=medianprops)
+        
+        for patch, color in zip(bp['boxes'], colors):
+            patch.set_facecolor(color)
+        
+        # Add jittered points if enabled
+        if add_jitter:
+            for j, pos in enumerate(positions):
+                x = pos + np.random.uniform(low=-jitter_width, high=jitter_width, size=len(data_list[j]))
+                axes[i].scatter(x, data_list[j], color='black', s=point_size**2, alpha=point_alpha, zorder=3)
+        
+        # Set x ticks and labels
+        axes[i].set_xticks(positions)
+        axes[i].set_xticklabels(groups, rotation=xtick_rotation)
+        
+        # Set xlim with padding
+        pad = group_spacing * 0.5
+        axes[i].set_xlim(positions[0] - pad, positions[-1] + pad)
+        
+        # Compute p-values
+        if ref_group is None:
+            ref_group = groups[0]
+        ref_idx = groups.index(ref_group)
+        pvals = {}
+        for j, group in enumerate(groups):
+            if group == ref_group:
+                continue
+            g1 = df[df['Group'] == ref_group]['Expression']
+            g2 = df[df['Group'] == group]['Expression']
+            _, pval = mannwhitneyu(g1, g2)
+            pvals[group] = pval
+        
+        # Title
+        axes[i].set_title(f'{gene}', fontsize=title_fontsize, fontweight='bold')
+        
+        if annotate_sig:
+            max_y = df['Expression'].max()
+            y_offset_base = max_y * 1.05
+            bar_height = max_y * 0.05  # Height increment for bars if multiple
+            
+            if len(groups) == 2:
+                # Single bar for two groups
+                pos0 = positions[0]
+                pos1 = positions[1]
+                pval = list(pvals.values())[0]
+                if pval < 0.001:
+                    sig = '***'
+                elif pval < 0.01:
+                    sig = '**'
+                elif pval < 0.05:
+                    sig = '*'
+                else:
+                    sig = 'ns'
+                y_offset = y_offset_base
+                axes[i].plot([pos0, pos0, pos1, pos1],
+                             [y_offset * 0.95, y_offset, y_offset, y_offset * 0.95], lw=bar_linewidth, c='k')
+                mid_x = (pos0 + pos1) / 2
+                axes[i].text(mid_x, y_offset, sig, ha='center', va='bottom', color='k', fontsize=sig_fontsize)
+                axes[i].text(mid_x, y_offset * 1.05, f'p={pval:.3f}', ha='center', va='bottom', color='gray', fontsize=pval_fontsize)
+                axes[i].set_ylim(axes[i].get_ylim()[0], y_offset * 1.1)
+            else:
+                # Multiple bars for comparisons to reference
+                offset_idx = 1
+                for group, pval in pvals.items():
+                    if pval < 0.001:
+                        sig = '***'
+                    elif pval < 0.01:
+                        sig = '**'
+                    elif pval < 0.05:
+                        sig = '*'
+                    else:
+                        sig = 'ns'
+                    group_idx = groups.index(group)
+                    pos_ref = positions[ref_idx]
+                    pos_group = positions[group_idx]
+                    y_offset = y_offset_base + (offset_idx - 1) * bar_height
+                    axes[i].plot([pos_ref, pos_ref, pos_group, pos_group],
+                                 [y_offset * 0.95, y_offset, y_offset, y_offset * 0.95], lw=bar_linewidth, c='k')
+                    mid_x = (pos_ref + pos_group) / 2
+                    axes[i].text(mid_x, y_offset, sig, ha='center', va='bottom', color='k', fontsize=sig_fontsize)
+                    # Optional: add p-value text
+                    # axes[i].text(mid_x, y_offset * 1.05, f'p={pval:.3f}', ha='center', va='bottom', color='gray', fontsize=pval_fontsize)
+                    offset_idx += 1
+                axes[i].set_ylim(axes[i].get_ylim()[0], y_offset_base + (len(pvals)) * bar_height)
+        
+        # Enhance labels
+        axes[i].set_xlabel('Group', fontsize=label_fontsize)
+        axes[i].set_ylabel(f'{gene} Expression', fontsize=label_fontsize)
+        axes[i].tick_params(axis='both', which='major', labelsize=tick_fontsize)
+    
+    plt.tight_layout()
+    plt.show()
+
+plot_genes_with_significance(
+    mdata_Epi_SOX4_48h_FC['rna'], 
+    ['SOX4', 'PTK7'], 
+    'DA_status',
+    palette='viridis',  # Try 'viridis', 'YlOrRd', 'tab10' etc. to match color schemes
+    add_jitter=True,
+    annotate_sig=True,
+    ref_group=None,  # Will use first group as reference
+    pairwise_to_ref=True,
+    point_size=0.5,  # Customize dotsize
+    title_fontsize=10,  # Customize header fontsize
+    label_fontsize=12,  # Customize label fontsize
+    pval_fontsize=5,
+    sig_fontsize=7,
+    tick_fontsize=12,  # Customize tick fontsize
+    fig_width_per_gene=3,  # Customize plot width per gene
+    fig_height=5,  # Customize plot height
+    group_spacing=1,  # Customize distance between categories
+    xtick_rotation=90  # Customize x tick label rotation
+)
+```
