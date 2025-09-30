@@ -785,3 +785,9 @@ seurat_obj <- UpdateSeuratObject(seurat_obj)
 SaveH5Seurat(seurat_obj, filename = "GSE135893_ILD_annotated_fullsize.h5Seurat")
 Convert("GSE135893_ILD_annotated_fullsize.h5Seurat", dest = "h5ad", overwrite = TRUE)
 ```
+
+### 36. Grey Red Colors for UMAP
+```
+from matplotlib import colors
+grey_red = colors.LinearSegmentedColormap.from_list("grouping", ["lightgray", "red", "darkred"], N=128)
+```
