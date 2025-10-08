@@ -984,11 +984,10 @@ plot_genes_with_significance(
 ```
 ### 38. Plot an embedding from adata from obsm
 ```
-sc.pl.embedding(adata_combined, basis='X_embedding_spatial_x_y', color=['ann_level_3'], ncols=2, wspace=0.5, palette=sc.pl.palettes.default_102
-)
+sc.pl.embedding(adata_combined, basis='X_embedding_spatial_x_y', color=['ann_level_3'], ncols=2, wspace=0.5, palette=sc.pl.palettes.default_102)
 ```
 
-### 39. Loading only required layers from 
+### 39. Loading only required layers from adata
 ```
 import scatlastb_utils
 from scatlastb_utils.io import read_anndata
