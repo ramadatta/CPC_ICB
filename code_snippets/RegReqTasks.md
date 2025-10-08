@@ -982,3 +982,22 @@ plot_genes_with_significance(
     xtick_rotation=90  # Customize x tick label rotation
 )
 ```
+### 38. Plot an embedding from adata from obsm
+```
+sc.pl.embedding(adata_combined, basis='X_embedding_spatial_x_y', color=['ann_level_3'], ncols=2, wspace=0.5, palette=sc.pl.palettes.default_102
+)
+```
+
+### 39. Loading only required layers from 
+```
+import scatlastb_utils
+from scatlastb_utils.io import read_anndata
+adata_spatial_subset = read_anndata(
+    "adata_spatial_subset.h5ad",
+    X='X',
+    obs='obs',
+    var='var',
+    obsm='obsm',
+    obsp='obsp',
+)
+```
