@@ -1000,3 +1000,7 @@ adata_spatial_subset = read_anndata(
     obsp='obsp',
 )
 ```
+### 40. Extract cells with regex pattern
+```
+adata_Epi_ILD = adata_Epi[adata_Epi.obs["sample"].str.contains("ILD", regex=True)]
+```
