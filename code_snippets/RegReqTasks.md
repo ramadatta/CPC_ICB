@@ -1004,3 +1004,18 @@ adata_spatial_subset = read_anndata(
 ```
 adata_Epi_ILD = adata_Epi[adata_Epi.obs["sample"].str.contains("ILD", regex=True)]
 ```
+
+### 41. Mass delete cols in obs and var
+```
+# List of columns to remove
+columns_to_removeVar = [
+'highly_variable', 'means', 'dispersions', 'dispersions_norm', 'highly_variable_nbatches', 'highly_variable_intersection'
+# Remove those columns if they exist
+adata_Epi.var.drop(columns=[col for col in columns_to_removeVar if col in adata_Epi.var.columns], inplace=True)
+
+# List of columns to remove
+columns_to_removeObs = [
+'whole_obj_leiden_cycle1_res5', 'whole_obj_leiden_cycle2_res0.05']
+# Remove those columns if they exist
+adata_Epi.obs.drop(columns=[col for col in columns_to_removeObs if col in adata_Epi.obs.columns], inplace=True)
+```
