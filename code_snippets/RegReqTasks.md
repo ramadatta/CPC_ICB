@@ -1019,3 +1019,32 @@ columns_to_removeObs = [
 # Remove those columns if they exist
 adata_Epi.obs.drop(columns=[col for col in columns_to_removeObs if col in adata_Epi.obs.columns], inplace=True)
 ```
+
+### 42. Dotplot with Clustering on both rows and column since scanpy dotplot cannot do this 
+```
+genes=["CDH2", "TP63"]
+# Cluster genes using linkage
+from scipy.cluster.hierarchy import linkage, leaves_list
+import numpy as np
+import pandas as pd
+
+# Compute average expression matrix for plotting
+dot_data = sc.get.obs_df(adata, keys=genes + ["annotation_cell_states"])
+mean_expr = dot_data.groupby("annotation_cell_states").mean().T  # genes x groups
+
+# Cluster both axes
+gene_linkage = linkage(mean_expr, method='ward')
+group_linkage = linkage(mean_expr.T, method='ward')
+
+gene_order = mean_expr.index[leaves_list(gene_linkage)]
+group_order = mean_expr.columns[leaves_list(group_linkage)]
+
+# Reorder adata accordingly
+sc.pl.dotplot(
+    adata,
+    var_names=gene_order,
+    groupby="annotation_cell_states",
+    standard_scale="var",
+    categories_order=group_order,
+)
+```
