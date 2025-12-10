@@ -1048,3 +1048,48 @@ sc.pl.dotplot(
     categories_order=group_order,
 )
 ```
+
+### 43. Problematic layers in adata to delete 
+```
+import os
+import h5py
+
+base_dir = "/ictstr01/groups/ml01/workspace/srsridatta.prakki/Analysis/2_hPCLS_Project_Main/2_exvivo/6_siRNA_batch2/Analysis/reannotate/byLineage/Epi/1_objects_aft_cytetype2b/"
+
+files = [
+    "adata_Epi_ILD_20251209.h5ad",
+    "adata_Epi_FC_20251209.h5ad",
+    "adata_Epi_PT_20251209.h5ad",
+]
+
+# the uns keys where the problematic params['layer'] lives
+uns_keys = [
+    "rgg_Epi_leiden_res1.0",
+    "rgg_Epi_leiden_res2.0",
+    "rgg_cytetype_annotation_Epi_leiden_res2.0",
+]
+
+def strip_layer_param(filepath):
+    print(f"\nProcessing: {os.path.basename(filepath)}")
+
+    with h5py.File(filepath, "r+") as f:
+        if "uns" not in f:
+            print("  No 'uns' in file, skipping.")
+            return
+
+        for key in uns_keys:
+            if key in f["uns"]:
+                grp = f["uns"][key]
+                if "params" in grp and "layer" in grp["params"]:
+                    del grp["params"]["layer"]
+                    print(f"  Deleted uns['{key}']['params']['layer']")
+                else:
+                    print(f"  No 'params/layer' under uns['{key}'], nothing to delete.")
+            else:
+                print(f"  uns['{key}'] not found, skipping.")
+
+
+for fname in files:
+    strip_layer_param(os.path.join(base_dir, fname))
+```
+
