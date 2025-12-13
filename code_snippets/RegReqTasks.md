@@ -253,6 +253,30 @@ for category in categories:
         size=10
     )
 
+# This will display all plots in multiple columns which above code does not
+sc.set_figure_params(figsize=(10,10))
+
+import matplotlib.pyplot as plt
+
+categories = ['Day_Zero', 'Control', 'Wnt/Notch']
+n_cols = len(categories)
+
+fig, axes = plt.subplots(1, n_cols, figsize=(6*n_cols, 6))
+
+for i, category in enumerate(categories):
+    sc.pl.umap(
+        adata_Epi_FC,
+        color=["Condition"],
+        groups=category,
+        title=f'{category}',
+        size=30,
+        ax=axes[i],
+        show=False
+    )
+
+plt.tight_layout()
+plt.show()
+
 ```
 ### 15. extract DEGs from rank_gene_groups into dataframe
 ```
