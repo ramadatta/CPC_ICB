@@ -751,6 +751,18 @@ sc.pl.rank_genes_groups_matrixplot(
     standard_scale="var"
 )
 
+genes = ["SOX4", "PTK7", "TP63", "CDH2", "TP53", 'CTHRC1', 'ACTA2', 'TNC', 'POSTN', 'KRT17', 'KRT8', 'KRT5', 'SPP1', 'SFTPC', 'ETV5', 'SCGB3A1', 'SFTPB', 'PLVAP', 'VWA1']
+
+sc.pl.matrixplot(
+    adata_Mes,
+    var_names=genes,          # your list
+    groupby="sample",         # the obs column to group by
+    cmap="viridis",
+    standard_scale="var",
+    categories_order=sample_order,   # <- enforce order
+    swap_axes=True
+)
+
 ```
 
 ### 29. Top genes from scanpy dataframe
