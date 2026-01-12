@@ -1128,4 +1128,274 @@ def strip_layer_param(filepath):
 for fname in files:
     strip_layer_param(os.path.join(base_dir, fname))
 ```
+### 44. Facet line plot for genes 
+```
+import pandas as pd
+import numpy as np
+from plotnine import ggplot, aes, geom_line, geom_point, geom_text, facet_wrap, labs, theme_bw, theme, element_text, scale_color_manual
+import scanpy as sc
 
+def plot_adata_gene_expression(adata, genes, group_by, title, conditions_to_include=None, 
+                               use_layer='X', lineage_name=None, cohort_name=None, ncol=4):
+    """
+    Plot gene expression from AnnData object grouped by any metadata column
+    
+    Parameters:
+    -----------
+    adata : AnnData object
+        Expression data with obs containing metadata
+    genes : list
+        List of gene names to plot
+    group_by : str
+        Column name in adata.obs to group by (e.g., 'Condition_status', 'compound')
+    title : str
+        Plot title
+    conditions_to_include : list, optional
+        Specific values of group_by column to include. If None, use all.
+    use_layer : str
+        Which layer to use ('X', 'log1p_norm', 'soupX_counts_auto'). Default: 'X'
+    lineage_name : str, optional
+        Name to use for lineage/cell type. If None, extracted from AnnData.obs if available
+    cohort_name : str, optional
+        Name to use for cohort. If None, extracted from AnnData.obs if available
+    ncol : int
+        Number of columns in facet grid (default: 4)
+    
+    Returns:
+    --------
+    plotnine.ggplot object
+    """
+    
+    # Validate genes
+    available_genes = list(adata.var_names)
+    genes_found = [g for g in genes if g in available_genes]
+    genes_missing = [g for g in genes if g not in available_genes]
+    
+    if genes_missing:
+        print(f"Warning: {len(genes_missing)} genes not found: {genes_missing}")
+    
+    if not genes_found:
+        raise ValueError(f"No genes found in adata.var_names")
+    
+    genes = genes_found
+    
+    # Get expression data
+    if use_layer == 'X':
+        expr = adata[:, genes].X
+    else:
+        if use_layer not in adata.layers:
+            raise ValueError(f"Layer '{use_layer}' not found. Available: {list(adata.layers.keys())}")
+        expr = adata[:, genes].layers[use_layer]
+    
+    # Convert to dense if sparse
+    if hasattr(expr, 'toarray'):
+        expr = expr.toarray()
+    
+    # Create dataframe
+    df_list = []
+    
+    # Get unique conditions
+    conditions = adata.obs[group_by].unique()
+    if conditions_to_include:
+        conditions = [c for c in conditions if c in conditions_to_include]
+    
+    # Aggregate by condition (mean expression)
+    for condition in conditions:
+        mask = adata.obs[group_by] == condition
+        expr_subset = expr[mask]
+        
+        for i, gene in enumerate(genes):
+            mean_expr = expr_subset[:, i].mean()
+            
+            df_list.append({
+                'Gene': gene,
+                'Condition': condition,
+                'Mean Expression': mean_expr,
+                'Lineage': lineage_name or 'Cell Type',
+                'Cohort': cohort_name or 'Cohort'
+            })
+    
+    df = pd.DataFrame(df_list)
+    
+    # Plot
+    lineage_colors = {
+        'Endo': '#FF3333',   # Red
+        'Str': '#FF8C00',    # Orange
+        'Epi': '#2ECC71',    # Green
+        'Imm': '#3498DB',    # Blue
+        'Cell Type': '#9C27B0'  # Purple (default)
+    }
+    
+    color = lineage_colors.get(lineage_name or 'Cell Type', '#9C27B0')
+    
+    # Get last points for labeling
+    last_points = df.sort_values('Condition').groupby('Gene').tail(1).copy()
+    
+    plot = (
+        ggplot(df, aes(x='Condition', y='Mean Expression', color='Lineage', group='Lineage')) +
+        geom_line(size=1) +
+        geom_point(size=3) +
+        geom_text(aes(label='Cohort'), data=last_points, ha='left', va='bottom', size=8, nudge_x=0.05, nudge_y=0) +
+        scale_color_manual(values={lineage_name or 'Cell Type': color}) +
+        facet_wrap('~Gene', ncol=ncol, scales='free_y') +
+        labs(title=title, x=group_by, y='Mean Expression') +
+        theme_bw() +
+        theme(
+            figure_size=(5, 5),
+            axis_text_x=element_text(size=11, angle=45, hjust=1),
+            axis_text_y=element_text(size=10),
+            strip_text=element_text(size=11, face='bold'),
+            plot_title=element_text(size=14, face='bold'),
+            legend_position='bottom',
+            legend_title=element_text(size=11),
+            legend_text=element_text(size=10)
+        )
+    )
+    return plot
+
+
+def plot_multiple_adata_gene_expression(adata_dict, genes, group_by, title, conditions_to_include=None,
+                                        use_layer='X', ncol=4):
+    """
+    Plot gene expression from multiple AnnData objects (e.g., different lineages/cohorts)
+    
+    Parameters:
+    -----------
+    adata_dict : dict
+        Dictionary of AnnData objects with keys like 'Epi_PT', 'Endo_FC', etc.
+        Key format: '{lineage}_{cohort}'
+    genes : list
+        List of gene names to plot
+    group_by : str
+        Column name in adata.obs to group by (e.g., 'Condition_status')
+    title : str
+        Plot title
+    conditions_to_include : list, optional
+        Specific values of group_by column to include. If None, use all.
+    use_layer : str
+        Which layer to use ('X', 'log1p_norm', 'soupX_counts_auto'). Default: 'X'
+    ncol : int
+        Number of columns in facet grid (default: 4)
+    
+    Returns:
+    --------
+    plotnine.ggplot object
+    """
+    
+    df_all = []
+    
+    for dataset_name, adata in adata_dict.items():
+        parts = dataset_name.split('_')
+        lineage = parts[0] if len(parts) > 0 else 'Unknown'
+        cohort = parts[1] if len(parts) > 1 else 'Unknown'
+        
+        # Validate genes
+        available_genes = list(adata.var_names)
+        genes_found = [g for g in genes if g in available_genes]
+        
+        if not genes_found:
+            print(f"Warning: No genes found in {dataset_name}")
+            continue
+        
+        # Get expression data
+        if use_layer == 'X':
+            expr = adata[:, genes_found].X
+        else:
+            if use_layer not in adata.layers:
+                continue
+            expr = adata[:, genes_found].layers[use_layer]
+        
+        # Convert to dense if sparse
+        if hasattr(expr, 'toarray'):
+            expr = expr.toarray()
+        
+        # Get unique conditions
+        conditions = adata.obs[group_by].unique()
+        if conditions_to_include:
+            conditions = [c for c in conditions if c in conditions_to_include]
+        
+        # Aggregate by condition
+        for condition in conditions:
+            mask = adata.obs[group_by] == condition
+            expr_subset = expr[mask]
+            
+            for i, gene in enumerate(genes_found):
+                mean_expr = expr_subset[:, i].mean()
+                
+                df_all.append({
+                    'Gene': gene,
+                    'Condition': condition,
+                    'Mean Expression': mean_expr,
+                    'Lineage': lineage,
+                    'Cohort': cohort,
+                    'Dataset': dataset_name
+                })
+    
+    df = pd.DataFrame(df_all)
+    
+    if df.empty:
+        raise ValueError("No data to plot")
+    
+    # Plot
+    lineage_colors = {
+        'Endo': '#FF3333',   # Red
+        'Str': '#FF8C00',    # Orange
+        'Epi': '#2ECC71',    # Green
+        'Imm': '#3498DB'     # Blue
+    }
+    
+    # Get last points for labeling
+    last_points = df.sort_values('Condition').groupby(['Gene', 'Dataset']).tail(1).copy()
+    
+    plot = (
+        ggplot(df, aes(x='Condition', y='Mean Expression', color='Lineage', group='Dataset')) +
+        geom_line(size=1) +
+        geom_point(size=3) +
+        geom_text(aes(label='Cohort'), data=last_points, ha='left', va='bottom', size=8, nudge_x=0.05, nudge_y=0) +
+        scale_color_manual(values=lineage_colors) +
+        facet_wrap('~Gene', ncol=ncol, scales='free_y') +
+        labs(title=title, x=group_by, y='Mean Expression') +
+        theme_bw() +
+        theme(
+            figure_size=(10, 5),
+            axis_text_x=element_text(size=11, angle=45, hjust=1),
+            axis_text_y=element_text(size=10),
+            strip_text=element_text(size=11, face='bold'),
+            plot_title=element_text(size=14, face='bold'),
+            legend_position='bottom',
+            legend_title=element_text(size=11),
+            legend_text=element_text(size=10)
+        )
+    )
+    return plot
+
+# === Example usage ===
+
+# Single AnnData object
+# plot1 = plot_adata_gene_expression(
+#     adata_Epi_PT,
+#     genes=['TGFB1', 'AXIN2', 'SP5'],
+#     group_by='Condition_status',
+#     title='My Gene Expression',
+#     conditions_to_include=['Control', 'Wnt activation', 'Wnt inhibition' ],
+#     lineage_name='Epi',
+#     cohort_name='PT'
+# )
+# plot1
+
+# # Multiple AnnData objects
+# adata_dict = {
+#     'Epi_PT': adata_Epi_PT,
+#     'Epi_FC': adata_Epi_FC,
+#     'Epi_ILD': adata_Epi_ILD
+# }
+
+# plot2 = plot_multiple_adata_gene_expression(
+#     adata_dict,
+#     genes=['TGFB1', 'AXIN2', 'SP5'],
+#     group_by='Condition_status',
+#     title='Epithelial Gene Expression',
+#     conditions_to_include=['Control', 'Wnt activation', 'Wnt inhibition' ],
+# )
+# plot2
+    ```
