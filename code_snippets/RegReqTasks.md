@@ -1398,4 +1398,9 @@ def plot_multiple_adata_gene_expression(adata_dict, genes, group_by, title, cond
 #     conditions_to_include=['Control', 'Wnt activation', 'Wnt inhibition' ],
 # )
 # plot2
-    ```
+```
+
+### 45. Rename a column in adata object
+```
+adata.obs.rename(columns={"condition_1a_FC_CC_Dzero": "condition_1a_FC_CC"}, inplace=True)
+```
